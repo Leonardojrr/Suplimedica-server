@@ -1,0 +1,7 @@
+Tienes que crear un archivo .env y colocar las siguientes variables
+
+PG_USER= ?
+PG_PASSWORD= ?
+PG_HOST= ?
+PG_PORT= ?
+PG_DATABASE= ?

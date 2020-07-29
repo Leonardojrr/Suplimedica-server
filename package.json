@@ -1,0 +1,30 @@
+{
+  "name": "suplimedica-server",
+  "version": "1.0.0",
+  "description": "Server for the app suplimedica",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./index.js",
+    "start": "node ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leonardojrr/Suplimedica-server.git"
+  },
+  "author": "leonardojrr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Leonardojrr/Suplimedica-server/issues"
+  },
+  "homepage": "https://github.com/Leonardojrr/Suplimedica-server#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "passport": "^0.4.1",
+    "pg": "^8.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
