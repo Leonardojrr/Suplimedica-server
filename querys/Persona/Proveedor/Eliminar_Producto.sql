@@ -1,0 +1,1 @@
+DELETE FROM public.producto_persona WHERE id_producto=$1 AND id_persona=$2

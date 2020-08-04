@@ -1,0 +1,1 @@
+SELECT * FROM public.producto WHERE codigo=$1

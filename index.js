@@ -4,6 +4,9 @@ const app = express();
 //Requires
 require("dotenv").config();
 
+//middlewares
+app.use(express.json());
+
 //Routers Imports
 const clientRouter = require("./routes/client");
 const providerRouter = require("./routes/provider");
