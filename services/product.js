@@ -1,8 +1,9 @@
 const DB = require("../database");
 const QR = require("../queryReader");
 
-const queryReader = new QR();
 const database = new DB();
+const queryReader = new QR();
+queryReader.addPath("Producto");
 
 const productService = {
   //Crear Producto
@@ -13,7 +14,7 @@ const productService = {
 
     //Verificar Si ya exste el codigo del producto
     const { rowCount } = await database.execute(
-      queryReader.read("Producto", "Verificar_Codigo"),
+      queryReader.read("Verificar_Codigo"),
       [code]
     );
 
@@ -22,9 +23,9 @@ const productService = {
       return "El codigo del producto que se a ingresado ya existe";
     }
 
-    //Crear Producto
     // prettier-ignore
-    const res = await database.execute(queryReader.read("Producto", "Crear"),
+    //Crear Producto
+    const res = await database.execute(queryReader.read("Crear"),
       [code, name, quantity, price, description]
     );
 

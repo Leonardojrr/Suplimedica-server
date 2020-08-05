@@ -6,6 +6,10 @@ class queryReader {
     this.path = "./querys";
   }
 
+  addPath(...path) {
+    for (let i of path) this.path += `/${i}`;
+  }
+
   read(...path) {
     let pathToRead = this.path;
 

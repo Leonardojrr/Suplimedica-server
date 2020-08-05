@@ -1,15 +1,16 @@
 const DB = require("../database");
 const QR = require("../queryReader");
 
-const queryReader = new QR();
 const database = new DB();
+const queryReader = new QR();
+queryReader.addPath("Persona");
 
 const providerService = {
   //Selecciona todos los proveedores
   getAllProviders: async () => {
     await database.conn();
     let res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Seleccionar_Todos"),
+      queryReader.read("Proveedor", "Seleccionar_Todos"),
       []
     );
     await database.close();
@@ -20,7 +21,7 @@ const providerService = {
   getProvider: async (values) => {
     await database.conn();
     let res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Buscar"),
+      queryReader.read("Proveedor", "Buscar"),
       values
     );
     await database.close();
@@ -31,7 +32,7 @@ const providerService = {
   getProviderByName: async (values) => {
     await database.conn();
     let res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Buscar_Nombre"),
+      queryReader.read("Proveedor", "Buscar_Nombre"),
       values
     );
     await database.close();
@@ -42,7 +43,7 @@ const providerService = {
   getProviderByCi: async (values) => {
     await database.conn();
     let res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Buscar_CI"),
+      queryReader.read("Proveedor", "Buscar_CI"),
       values
     );
     await database.close();
@@ -57,7 +58,7 @@ const providerService = {
 
     //Verificar CI
     const { rowCount } = await database.execute(
-      queryReader.read("Persona", "Verificar_CI"),
+      queryReader.read("Verificar_CI"),
       [ci]
     );
     if (rowCount > 0) {
@@ -66,10 +67,12 @@ const providerService = {
     }
 
     //Crear el Proveedor
-    let res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Crear"),
-      [name, address, number, ci]
-    );
+    let res = await database.execute(queryReader.read("Proveedor", "Crear"), [
+      name,
+      address,
+      number,
+      ci,
+    ]);
     await database.close();
 
     return res;
@@ -83,7 +86,7 @@ const providerService = {
 
     //Verificar CI
     const { rowCount } = await database.execute(
-      queryReader.read("Persona", "Verificar_Actualizar_CI"),
+      queryReader.read("Verificar_Actualizar_CI"),
       [ci, id]
     );
     if (rowCount != 0) {
@@ -92,10 +95,13 @@ const providerService = {
     }
 
     //Actualizar proveedor
-    const res = await database.execute(
-      queryReader.read("Persona", "Actualizar"),
-      [id, name, address, number, ci]
-    );
+    const res = await database.execute(queryReader.read("Actualizar"), [
+      id,
+      name,
+      address,
+      number,
+      ci,
+    ]);
 
     await database.close();
 
@@ -107,7 +113,7 @@ const providerService = {
     await database.conn();
 
     const res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Borrar"),
+      queryReader.read("Proveedor", "Borrar"),
       [id]
     );
 
@@ -121,7 +127,7 @@ const providerService = {
     await database.conn();
 
     const res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Seleccionar_Todos_Productos"),
+      queryReader.read("Proveedor", "Seleccionar_Todos_Productos"),
       []
     );
 
@@ -130,11 +136,12 @@ const providerService = {
     return res;
   },
 
+  //Seleccionar productos de un proveedor
   getProducts: async (id_provider) => {
     await database.conn();
 
     const res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Seleccionar_Productos"),
+      queryReader.read("Proveedor", "Seleccionar_Productos"),
       [id_provider]
     );
 
@@ -151,7 +158,7 @@ const providerService = {
 
     //Verifica si este proveedor ya tiene el producto que se quiere agregar
     const { rowCount } = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Verificar_Producto"),
+      queryReader.read("Proveedor", "Verificar_Producto"),
       [id_product, id_provider]
     );
 
@@ -161,7 +168,7 @@ const providerService = {
     }
 
     const res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Agregar_Producto"),
+      queryReader.read("Proveedor", "Agregar_Producto"),
       [id_product, id_provider]
     );
 
@@ -177,7 +184,7 @@ const providerService = {
     await database.conn();
 
     const res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Eliminar_Producto"),
+      queryReader.read("Proveedor", "Eliminar_Producto"),
       [id_product, id_provider]
     );
 

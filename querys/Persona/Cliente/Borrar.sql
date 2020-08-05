@@ -1,0 +1,1 @@
+DELETE FROM public.persona WHERE id_persona=$1
