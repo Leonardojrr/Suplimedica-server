@@ -33,8 +33,15 @@ router.get("/", async (req, resp) => {
   }
 });
 
+//Seleccionar productos de todos los proveedores
 router.get("/product", async (req, resp) => {
   const res = await providerService.getAllProducts();
+  resp.send(res.rows);
+});
+
+//Seleccionar productos de un proveedor
+router.get("/product/:id", async (req, resp) => {
+  const res = await providerService.getProducts(req.params.id);
   resp.send(res.rows);
 });
 

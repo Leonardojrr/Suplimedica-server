@@ -121,8 +121,21 @@ const providerService = {
     await database.conn();
 
     const res = await database.execute(
-      queryReader.read("Persona", "Proveedor", "Seleccionar_Productos"),
+      queryReader.read("Persona", "Proveedor", "Seleccionar_Todos_Productos"),
       []
+    );
+
+    await database.close();
+
+    return res;
+  },
+
+  getProducts: async (id_provider) => {
+    await database.conn();
+
+    const res = await database.execute(
+      queryReader.read("Persona", "Proveedor", "Seleccionar_Productos"),
+      [id_provider]
     );
 
     await database.close();
@@ -136,6 +149,7 @@ const providerService = {
 
     await database.conn();
 
+    //Verifica si este proveedor ya tiene el producto que se quiere agregar
     const { rowCount } = await database.execute(
       queryReader.read("Persona", "Proveedor", "Verificar_Producto"),
       [id_product, id_provider]
