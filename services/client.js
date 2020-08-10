@@ -59,7 +59,7 @@ const clientService = {
   //Crea un cliente
   createClient: async (values) => {
     const { name, address, number, ci } = values;
-
+    console.log(values);
     await database.conn();
 
     //Verificar CI
