@@ -1,0 +1,1 @@
+UPDATE public.usuario SET nombre_usuario=$2 WHERE id_persona=$1 RETURNING id_usuario;

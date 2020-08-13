@@ -1,1 +1,1 @@
-SELECT * FROM public.producto_persona WHERE id_persona=$1 AND id_producto=$2
+SELECT * FROM public.producto_persona WHERE id_producto=$1 AND id_persona=$2

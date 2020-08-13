@@ -1,7 +1,6 @@
 const DB = require("../database");
 const QR = require("../queryReader");
 const bcrypt = require("bcrypt");
-const { query } = require("express");
 
 const database = new DB();
 const queryReader = new QR();
@@ -20,30 +19,57 @@ function ModulesToInsert(user_id, modules) {
 const userService = {
   //Selecciona todos los usuarios
   getAllUsers: async () => {
-    await database.conn();
+    let usuarios = [];
 
-    const res = await database.execute(
-      queryReader.read("Usuario", "Seleccionar_Todos"),
-      []
-    );
+    try {
+      await database.conn();
 
-    await database.close();
+      //Trae a todos los usuarios
+      const { rows: lista_usuarios } = await database.execute(
+        queryReader.read("Usuario", "Traer_Todos"),
+        []
+      );
 
-    return res;
+      //Trae los modulos de los usuarios
+      for (let usuario of lista_usuarios) {
+        let { rows: modules } = await database.execute(
+          queryReader.read("Usuario", "Traer_Modulos"),
+          [usuario.id_usuario]
+        );
+
+        usuario.modules = [];
+        for (let module of modules) {
+          usuario.modules.push(module.id_modulo);
+        }
+      }
+
+      await database.close();
+
+      return {
+        status: 200,
+        msg: "Se buscaron los usuarios exitosamente",
+        data: lista_usuarios,
+      };
+    } catch (e) {
+      console.log(e);
+      return { status: 400, msg: "Error al buscar los usuarios" };
+    }
   },
 
-  //Selecciona usuarios por nombre y ci
-  getUser: async (values) => {
+  //Selecciona usuarios por id
+  getUser: async (id) => {
     await database.conn();
 
-    const res = await database.execute(
+    const { rows } = await database.execute(
       queryReader.read("Usuario", "Buscar"),
-      values
+      [id]
     );
 
+    rows[0].modules = await userService.getModules(rows[0].id_usuario);
+    console.log("user", rows[0]);
     await database.close();
 
-    return res;
+    return rows[0];
   },
 
   //Selecciona usuarios por nombre
@@ -89,7 +115,7 @@ const userService = {
 
       if (ci_rows > 0) {
         await database.close();
-        return "Ya existe una persona con este ci";
+        return { status: 409, msg: "Ya existe una persona con este ci" };
       }
 
       //Verificar nombre de usuario
@@ -102,7 +128,10 @@ const userService = {
 
       if (username_rows > 0) {
         await database.close();
-        return "Ya existe una persona con este nombre de usuario";
+        return {
+          status: 409,
+          msg: "Ya existe una persona con este nombre de usuario",
+        };
       }
 
       //Crear el usuario
@@ -119,35 +148,168 @@ const userService = {
         [username, await bcrypt.hash(password, 10), rows_persona[0].id_persona]
       );
 
-      console.log(rows_usuario);
-
       //Colocar datos en Modulos
       if (modules.length > 0) {
-        console.log(
-          queryReader.read("Usuario", "Agregar_Acceso") +
-            ModulesToInsert(rows_usuario[0].id_usuario, modules)
-        );
-        const asd = await database.execute(
+        await database.execute(
           queryReader.read("Usuario", "Agregar_Acceso") +
             ModulesToInsert(rows_usuario[0].id_usuario, modules),
           []
         );
-        console.log(asd);
       }
 
       await database.close();
 
-      return "usuario creado exitosamente";
+      return { status: 200, msg: "Usuario creado exitosamente" };
     } catch (e) {
       console.log(e);
+      return { status: 500, msg: "Se produjo un error al crear el usuario" };
     }
   },
 
   //Actualiza un usuario
-  updateUser: async () => {},
+  updateUser: async (id_persona, values) => {
+    const {
+      nombre_persona,
+      ci_persona,
+      numero_persona,
+      direccion_persona,
+      nombre_usuario,
+      contrasena_usuario,
+      modules,
+    } = values;
+
+    try {
+      await database.conn();
+
+      //Verifica la cedula
+      const { rowCount: personas } = await database.execute(
+        queryReader.read("Verificar_Actualizar_CI"),
+        [ci_persona, id_persona]
+      );
+
+      if (personas > 0) {
+        await database.close();
+        return { status: 409, msg: "Ya existe un usuario con esta cedula" };
+      }
+
+      //Verifica el nombre de usuario
+      const { rowCount: usuarios } = await database.execute(
+        queryReader.read("Usuario", "Verificar_Nombre"),
+        [nombre_usuario, id_persona]
+      );
+
+      if (usuarios > 0) {
+        await database.close();
+        return { status: 409, msg: "Ya existe un usuario con este nombre" };
+      }
+
+      //Actualiza los datos del usuario en la tabla persona
+      await database.execute(queryReader.read("Actualizar_Persona"), [
+        id_persona,
+        nombre_persona,
+        direccion_persona,
+        numero_persona,
+        ci_persona,
+      ]);
+
+      let idUsuario = null;
+
+      //Actualiza los datos del usuario en la tabla usuario
+      if (!contrasena_usuario) {
+        //Cambia el usuario pero no la clave
+        const { rows } = await database.execute(
+          queryReader.read("Usuario", "Actualizar"),
+          [id_persona, nombre_usuario]
+        );
+
+        idUsuario = rows[0].id_usuario;
+      } else {
+        //Cambia usuario con clave
+        const { rows } = await database.execute(
+          queryReader.read("Usuario", "Actualizar_Clave"),
+          [
+            id_persona,
+            nombre_usuario,
+            await bcrypt.hash(contrasena_usuario, 10),
+          ]
+        );
+
+        idUsuario = rows[0].id_usuario;
+      }
+
+      //Borra los modulos del usuario
+      await database.execute(queryReader.read("Usuario", "Borrar_Acceso"), [
+        idUsuario,
+      ]);
+
+      //Agrega los nuevos modulos del usuario
+      await database.execute(
+        queryReader.read("Usuario", "Agregar_Acceso") +
+          ModulesToInsert(idUsuario, modules),
+        []
+      );
+
+      await database.close();
+
+      return { status: 200, msg: "Usuario actualizado exitosamente" };
+    } catch (e) {
+      console.log(e);
+      return { status: 500, msg: "Algo salio mal al actualizar el usuario" };
+    }
+  },
 
   //Borra un usuario
   deleteUser: async () => {},
+
+  //Logeo de usuario
+  login: async (values) => {
+    const { username, password } = values;
+
+    try {
+      await database.conn();
+      //Verificar que exista nombre de usuario
+      const { rows } = await database.execute(
+        queryReader.read("Usuario", "Buscar_Login"),
+        [username]
+      );
+
+      if (rows.length > 0) {
+        if (await bcrypt.compare(password, rows[0].contrasena_usuario)) {
+          const { rows: userData } = await database.execute(
+            queryReader.read("Usuario", "Buscar"),
+            [rows[0].id_usuario]
+          );
+
+          const { rows: modules } = await database.execute(
+            queryReader.read("Usuario", "Traer_Modulos"),
+            [userData[0].id_usuario]
+          );
+
+          let arr = [];
+
+          for (let i of modules) {
+            arr.push(i.id_modulo);
+          }
+
+          userData[0].modules = arr;
+          await database.close();
+          return {
+            status: 200,
+            msg: "Usuario logeado exitosamente",
+            data: userData[0],
+          };
+        } else {
+          await database.close();
+          return { status: 202, msg: "Verfique los datos ingresados" };
+        }
+      } else {
+        await database.close();
+        return { status: 202, msg: "Verfique los datos ingresados" };
+      }
+    } catch (e) {
+      return { status: 500, msg: "Sucedio un error al iniciar sesion" };
+    }
+  },
 };
 
 module.exports = userService;

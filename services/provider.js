@@ -63,7 +63,7 @@ const providerService = {
     );
     if (rowCount > 0) {
       await database.close();
-      return "Ya existe una persona con esta cedula";
+      return { status: 409, msg: "Este proveedor ya existe" };
     }
 
     //Crear el Proveedor
@@ -75,7 +75,7 @@ const providerService = {
     ]);
     await database.close();
 
-    return res;
+    return { status: 200, msg: "Proveedor creado exitosamente" };
   },
 
   //Actualiza un Proveedor
@@ -89,13 +89,13 @@ const providerService = {
       queryReader.read("Verificar_Actualizar_CI"),
       [ci, id]
     );
-    if (rowCount != 0) {
+    if (rowCount > 0) {
       await database.close();
-      return "Ya existe una persona con esta cedula";
+      return { status: 409, msg: "Esta cedula ya existe" };
     }
 
     //Actualizar proveedor
-    const res = await database.execute(queryReader.read("Actualizar"), [
+    await database.execute(queryReader.read("Actualizar"), [
       id,
       name,
       address,
@@ -105,7 +105,7 @@ const providerService = {
 
     await database.close();
 
-    return res;
+    return { status: 200, msg: "Proveedor editado exitosamente" };
   },
 
   //Borrar proveedor
@@ -164,17 +164,20 @@ const providerService = {
 
     if (rowCount > 0) {
       await database.close();
-      return "Este proveedor ya tiene agregado este producto";
+      return {
+        status: 500,
+        msg: "Este proveedor ya tiene agregado este producto",
+      };
     }
 
     const res = await database.execute(
       queryReader.read("Proveedor", "Agregar_Producto"),
       [id_product, id_provider]
     );
-
+    console.log(res);
     await database.close();
 
-    return res;
+    return { status: 200, msg: "Producto añadido a proveedor exitosamente" };
   },
 
   //Eliminar Producto

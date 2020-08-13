@@ -1,0 +1,1 @@
+SELECT * FROM public.producto WHERE codigo=$1 AND id_producto!=$2

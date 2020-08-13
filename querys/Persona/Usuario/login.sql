@@ -1,0 +1,1 @@
+SELECT * FROM public.usuario WHERE nombre_usuario=$1 AND contrasena_usuario=$2

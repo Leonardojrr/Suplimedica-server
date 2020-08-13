@@ -3,9 +3,17 @@ const router = express.Router();
 
 const productService = require("../services/product");
 
-router.get("/", async (req, resp) => {});
+//Selecciona todos los productos
+router.get("/", async (req, resp) => {
+  const res = await productService.getAllProducts();
+  resp.send(res);
+});
 
-router.get("/:id", async (req, resp) => {});
+//Selecciona proveedores del producto seleccionado
+router.get("/:id", async (req, resp) => {
+  const res = await productService.getProviders(req.params.id);
+  resp.send(res);
+});
 
 //Crear Producto
 router.post("/", async (req, resp) => {
@@ -13,8 +21,10 @@ router.post("/", async (req, resp) => {
   resp.send(res);
 });
 
-router.put("/:id", async (req, resp) => {});
-
-router.delete("/:id", async (req, resp) => {});
+//Actualiza un producto
+router.put("/:id", async (req, resp) => {
+  const res = await productService.updateProduct(req.params.id, req.body);
+  resp.send(res);
+});
 
 module.exports = router;

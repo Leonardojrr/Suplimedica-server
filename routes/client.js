@@ -9,7 +9,7 @@ router.get("/", async (req, resp) => {
   //Selecciona todos los clientes
   if (!name && !ci) {
     res = await clientService.getAllClients();
-    resp.send(res.rows);
+    resp.send(res);
   }
 
   // Selecciona clientes por nombre y por ci

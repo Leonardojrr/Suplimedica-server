@@ -12,28 +12,17 @@ app.use((req, resp, next) => {
   resp.header("Access-Control-Allow-Headers", "*");
   next();
 });
-app.use(
-  session({
-    secret: process.env.SECRET,
-    resave: false,
-    saveUninitialized: false,
-  })
-);
 
 //Routers Imports
 const clientRouter = require("./routes/client");
 const providerRouter = require("./routes/provider");
-const inventoryRouter = require("./routes/inventory");
 const userRouter = require("./routes/user");
 const productRouter = require("./routes/product");
-const saleRouter = require("./routes/sale");
-const purchaseRouter = require("./routes/purchase");
+const operationRouter = require("./routes/operation");
 const authRouter = require("./routes/login");
 
 //App Routes
-app.use("/inventory", inventoryRouter);
-app.use("/purchase", purchaseRouter);
-app.use("/sale", saleRouter);
+app.use("/operation", operationRouter);
 app.use("/product", productRouter);
 app.use("/provider", providerRouter);
 app.use("/client", clientRouter);

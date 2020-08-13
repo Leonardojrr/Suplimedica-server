@@ -1,0 +1,1 @@
+DELETE FROM public.usuario_modulo WHERE id_usuario=$1

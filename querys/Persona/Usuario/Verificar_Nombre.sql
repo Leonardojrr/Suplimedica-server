@@ -1,1 +1,1 @@
-SELECT * FROM public.usuario WHERE nombre_usuario=$1
+SELECT * FROM public.usuario WHERE nombre_usuario=$1 AND id_persona!=$2

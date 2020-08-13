@@ -1,0 +1,2 @@
+SELECT persona.id_persona, nombre_persona, direccion_persona, numero_persona, ci_persona, tipo_persona, id_usuario, nombre_usuario FROM public.persona
+INNER JOIN public.usuario ON persona.id_persona=usuario.id_persona where id_usuario = $1

@@ -1,0 +1,1 @@
+Select id_modulo from usuario_modulo where id_usuario = $1

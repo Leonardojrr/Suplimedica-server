@@ -8,14 +8,23 @@ queryReader.addPath("Persona");
 const clientService = {
   //Selecciona todos los clientes
   getAllClients: async () => {
-    await database.conn();
-    let res = await database.execute(
-      queryReader.read("Cliente", "Seleccionar_Todos"),
-      []
-    );
-    await database.close();
+    try {
+      await database.conn();
+      let { rows } = await database.execute(
+        queryReader.read("Cliente", "Seleccionar_Todos"),
+        []
+      );
+      await database.close();
 
-    return res;
+      return {
+        status: 200,
+        msg: "Se buscaron los clientes exitosamente",
+        data: rows,
+      };
+    } catch (e) {
+      console.log(e);
+      return { status: 500, msg: "Se produjo un error al traer los clientes" };
+    }
   },
 
   //Selecciona clientes por nombre y ci
@@ -69,7 +78,7 @@ const clientService = {
     );
     if (rowCount > 0) {
       await database.close();
-      return "Ya existe una persona con esta cedula";
+      return { status: 209, msg: "Ya existe una persona con esta cedula" };
     }
 
     //Crear el cliente
@@ -81,7 +90,7 @@ const clientService = {
     ]);
     await database.close();
 
-    return res;
+    return { status: 200, msg: "Se creo el cliente exitosamente" };
   },
 
   //Actualiza un cliente
@@ -97,11 +106,11 @@ const clientService = {
     );
     if (rowCount != 0) {
       await database.close();
-      return "Ya existe una persona con esta cedula";
+      return { status: 409, msg: "Ya existe una persona con esta cedula" };
     }
 
     //Actualizar cliente
-    const res = await database.execute(queryReader.read("Actualizar"), [
+    await database.execute(queryReader.read("Actualizar"), [
       id,
       name,
       address,
@@ -111,7 +120,7 @@ const clientService = {
 
     await database.close();
 
-    return res;
+    return { status: 200, msg: "Se actualizo el cliente exitosamente" };
   },
 
   //Borrar cliente
